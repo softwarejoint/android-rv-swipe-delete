@@ -21,14 +21,8 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-}
-
-repositories {
-    mavenCentral()
-    google()
 }
 
 dependencies {
@@ -38,4 +32,5 @@ dependencies {
 
     compile 'com.android.support:appcompat-v7:27.0.1'
     compile 'com.android.support:recyclerview-v7:27.0.1'
+    compile 'com.android.support:design:27.0.1'
 }

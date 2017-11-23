@@ -1,13 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
+
 android {
     compileSdkVersion 27
     buildToolsVersion "27.0.1"
-
-    lintOptions {
-        abortOnError false
-    }
 
     defaultConfig {
         minSdkVersion 16
