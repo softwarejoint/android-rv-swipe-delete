@@ -14,8 +14,9 @@ abstract class SwipeAnimation implements Animator.AnimatorListener {
     float mFraction;
     float updatedX;
 
+    RecyclerView.ViewHolder holder;
+
     private RecyclerView recyclerView;
-    private RecyclerView.ViewHolder holder;
     private ValueAnimator mValueAnimator;
     private boolean mEnded;
 
