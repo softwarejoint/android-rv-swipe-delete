@@ -1,7 +1,7 @@
 Android Slide Action
 =========================
 
-## Android Sliding Up Panel
+## Android Slide Action Recycler View
 
 [![Release](https://jitpack.io/v/softwarejoint/android-rv-swipe-delete.svg)](https://jitpack.io/#softwarejoint/android-rv-swipe-delete)
 
