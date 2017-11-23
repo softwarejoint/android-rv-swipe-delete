@@ -24,7 +24,7 @@ Based On https://github.com/kitek/android-rv-swipe-delete
 
 ```
     dependencies {
-	    compile 'com.github.softwarejoint:/android-rv-swipe-delete:1.0.0'
+	    compile 'com.github.softwarejoint:/android-rv-swipe-delete:1.0.1'
 	}
 
 ```
