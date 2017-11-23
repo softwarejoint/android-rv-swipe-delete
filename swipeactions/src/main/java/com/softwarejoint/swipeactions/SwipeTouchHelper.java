@@ -457,8 +457,16 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent event) {
         int action = event.getActionMasked();
 
-        if (!isSwiping && action == MotionEvent.ACTION_UP) {
-            handleOnClick(rv, event);
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                obtainVelocityTracker();
+                velocityTracker.addMovement(event);
+                break;
+            case MotionEvent.ACTION_UP:
+                if (!isSwiping) {
+                    handleOnClick(rv, event);
+                }
+                break;
         }
 
         return false;
@@ -481,11 +489,10 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         int pointerId = event.getPointerId(index);
 
         switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                obtainVelocityTracker();
-                velocityTracker.addMovement(event);
-                break;
             case MotionEvent.ACTION_MOVE:
+                if (velocityTracker == null){
+                    obtainVelocityTracker();
+                }
                 velocityTracker.addMovement(event);
                 velocityTracker.computeCurrentVelocity(PIXELS_PER_SECOND, mMaxSwipeVelocity);
                 currentVelocity = velocityTracker.getXVelocity(pointerId);
