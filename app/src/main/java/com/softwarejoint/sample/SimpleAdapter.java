@@ -1,4 +1,4 @@
-package com.softwarejoint.swipe;
+package com.softwarejoint.sample;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;

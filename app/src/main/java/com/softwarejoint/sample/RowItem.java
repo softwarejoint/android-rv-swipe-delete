@@ -1,4 +1,4 @@
-package com.softwarejoint.swipe;
+package com.softwarejoint.sample;
 
 class RowItem {
     final String text;

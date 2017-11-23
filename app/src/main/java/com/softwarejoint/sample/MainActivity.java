@@ -1,4 +1,4 @@
-package com.softwarejoint.swipe;
+package com.softwarejoint.sample;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
