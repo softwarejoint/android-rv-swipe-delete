@@ -2,13 +2,13 @@ package com.softwarejoint.swipeactions;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.ColorRes;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.MotionEvent;
@@ -51,8 +51,9 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     private ItemTouchHelper itemTouchHelper;
 
     private boolean isAttached;
+    private SimpleItemDecoration itemDecoration;
 
-    public SwipeTouchHelper(Context context, RecyclerView recyclerView, Drawable icon, OnSwipeItemClickedListener listener) {
+    public SwipeTouchHelper(RecyclerView recyclerView, Drawable icon, OnSwipeItemClickedListener listener) {
         super(0, ItemTouchHelper.LEFT);
 
         onSwipeItemClickedListener = listener;
@@ -60,10 +61,11 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         deleteIcon = icon;
         intrinsicWidth = icon.getIntrinsicWidth();
         intrinsicHeight = icon.getIntrinsicHeight();
-        background = new ColorDrawable(Color.parseColor("#f44336"));
+        background = new ColorDrawable();
 
         this.recyclerView = recyclerView;
         final Resources resources = recyclerView.getResources();
+
         mSwipeEscapeVelocity = resources.getDimension(R.dimen.swipe_escape_velocity);
         mMaxSwipeVelocity = resources.getDimension(R.dimen.swipe_max_velocity);
         animationDuration = resources.getInteger(android.R.integer.config_shortAnimTime);
@@ -74,10 +76,25 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             itemTouchHelper = new ItemTouchHelper(this);
         }
 
-        recyclerView.addItemDecoration(new SimpleItemDecoration(this));
+        setSwipeBackGroundColor(Color.parseColor("#f44336"));
+        itemDecoration = new SimpleItemDecoration(this);
+        setSwipeHelperEnabled(true);
+    }
 
-        attachToRecyclerView(recyclerView);
-        recyclerView.addOnChildAttachStateChangeListener(this);
+    public void setSwipeHelperEnabled(boolean enabled) {
+        if (enabled) {
+            attachToRecyclerView(recyclerView);
+            recyclerView.addItemDecoration(itemDecoration);
+            recyclerView.addOnChildAttachStateChangeListener(this);
+        } else {
+            attachToRecyclerView(null);
+            recyclerView.removeItemDecoration(itemDecoration);
+            recyclerView.removeOnChildAttachStateChangeListener(this);
+        }
+    }
+
+    public void setSwipeBackGroundColor(@ColorRes int resourceId) {
+        background.setColor(resourceId);
     }
 
     @Override

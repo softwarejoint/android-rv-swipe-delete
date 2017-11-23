@@ -7,16 +7,17 @@ import android.util.Log;
 
 abstract class SwipeAnimation implements Animator.AnimatorListener {
 
-    protected static final String TAG = "SimpleAnimation";
+    private static final String TAG = "SimpleAnimation";
 
-    protected final float startX;
+    final float startX;
+    float swipeDistanceX;
+    float mFraction;
+    float updatedX;
+
     private RecyclerView recyclerView;
-    protected RecyclerView.ViewHolder holder;
-    protected float swipeDistanceX;
-    protected ValueAnimator mValueAnimator;
-    protected float mFraction;
-    protected boolean mEnded;
-    protected float updatedX;
+    private RecyclerView.ViewHolder holder;
+    private ValueAnimator mValueAnimator;
+    private boolean mEnded;
 
     SwipeAnimation(RecyclerView recyclerView, RecyclerView.ViewHolder holder, float swipeDistanceX) {
         this.recyclerView = recyclerView;

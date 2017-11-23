@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recyclerView.setAdapter(adapter);
 
         Drawable deleteIcon = ContextCompat.getDrawable(this, R.drawable.ic_delete_white_24);
-        swipeTouchHelper = new SwipeTouchHelper(this, recyclerView, deleteIcon, this);
+        swipeTouchHelper = new SwipeTouchHelper(recyclerView, deleteIcon, this);
     }
 
     @Override
