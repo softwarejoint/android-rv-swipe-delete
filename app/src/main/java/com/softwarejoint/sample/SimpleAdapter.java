@@ -1,11 +1,9 @@
 package com.softwarejoint.sample;
 
-import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +17,7 @@ import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder> {
 
     private static final String TAG = "SimpleAdapter";
@@ -28,7 +27,8 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     private CoordinatorLayout mLayout;
     private ArrayList<RowItem> items;
     private int itemId = 0;
-    private @ColorInt int colorInt = -1;
+    private @ColorInt
+    int colorInt = -1;
 
     SimpleAdapter(RecyclerView recyclerView) {
         items = new ArrayList<>();
@@ -80,14 +80,10 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
     public RowItem removeAt(final int position) {
         final RowItem rowItem = items.remove(position);
         notifyItemRemoved(position);
-        Snackbar snackbar = Snackbar.make(mLayout, "rowItem: " + rowItem.text + " : " + position + " removed.", Snackbar.LENGTH_LONG);
-        if (colorInt != -1) {
-            snackbar.setActionTextColor(colorInt);
-        }
 
-        snackbar.setAction("Undo", view -> {
-            undoLastDelete(rowItem, position);
-        });
+        Snackbar snackbar = Snackbar.make(mLayout, "rowItem: " + rowItem.text + " : " + position + " removed.", Snackbar.LENGTH_LONG);
+        snackbar.setAction("Undo", view -> undoLastDelete(rowItem, position));
+        if (colorInt != -1) snackbar.setActionTextColor(colorInt);
 
         snackbar.addCallback(new Snackbar.Callback() {
             @Override
@@ -102,7 +98,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
         return rowItem;
     }
 
-    protected void onItemDeleteConfirmed(RowItem rowItem, int position) {
+    protected void onItemDeleteConfirmed(@NonNull RowItem rowItem, int position) {
         Log.d(TAG, "onItemDeleteConfirmed: " + position);
     }
 

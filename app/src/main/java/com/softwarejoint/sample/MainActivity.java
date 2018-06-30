@@ -80,8 +80,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         randomVar = randomVar + 1;
 
         if (randomVar % 2 == 0) {
+            //Delete row & present snackbar to undo
             uiThreadHandler.postDelayed(() -> swipeTouchHelper.undoAction(viewHolder), 200L);
         } else {
+            //Undo delete row swipe action
             final int position = viewHolder.getAdapterPosition();
             uiThreadHandler.postDelayed(() -> adapter.removeAt(position), 200L);
         }
