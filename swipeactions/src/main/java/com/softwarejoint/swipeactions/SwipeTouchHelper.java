@@ -215,7 +215,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             absDx = Math.max(absDx, swipeVisibleMark);
         }
 
-        Log.d(TAG, "onTouch: " + itemId + " transX: " + viewHolder.itemView.getTranslationX() + " ac: " + isCurrentlyActive);
+        //Log.d(TAG, "onTouch: " + itemId + " transX: " + viewHolder.itemView.getTranslationX() + " ac: " + isCurrentlyActive);
 
         super.onChildDraw(c, recyclerView, viewHolder, -absDx, dY, ItemTouchHelper.ACTION_STATE_SWIPE, false);
     }
@@ -592,7 +592,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
                 break;
             case MotionEvent.ACTION_UP:
                 isSwiping = false;
-                Log.d(TAG, "onTouch: action up");
+                //Log.d(TAG, "onTouch: action up");
             case MotionEvent.ACTION_CANCEL:
                 velocityTracker.computeCurrentVelocity(PIXELS_PER_SECOND, mMaxSwipeVelocity);
                 currentVelocity = velocityTracker.getXVelocity(pointerId);
