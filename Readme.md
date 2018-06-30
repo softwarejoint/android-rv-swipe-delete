@@ -9,7 +9,9 @@ This library provides a simple way to add a draggable sliding up panel (populari
 
 Based On https://github.com/kitek/android-rv-swipe-delete
 
-![Alt text](/screenshot/device-2018-06-30-075510.png?raw=true "Optional Title")
+<p align="center">
+  <img src="/screenshot/device-2018-06-30-075510.png" width="320" title="Example">
+</p>
 
 Lots of work has been put in making it seem smooth and close to iOS in feel.
 
