@@ -2,19 +2,15 @@ package com.softwarejoint.swipeactions;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -131,7 +127,9 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         if (!isAttached) return;
 
         long itemId = viewHolder.getItemId();
-        if (isItemIdValid(itemId)) { return; }
+        if (isItemIdValid(itemId)) {
+            return;
+        }
 
         viewHolder.itemView.setAlpha(1.0f);
         super.clearView(recyclerView, viewHolder);
@@ -246,13 +244,19 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         RecyclerView.ViewHolder clickedHolder = null;
         long matchedItemId = Long.MIN_VALUE;
 
-        for (long itemId: items) {
+        for (long itemId : new ArrayList<>(items)) {
             RecyclerView.ViewHolder holder = parent.findViewHolderForItemId(itemId);
-            if (holder == null) { continue; }
+
+            if (holder == null) {
+                continue;
+            }
+
             int viewHolderTop = holder.itemView.getTop();
             int viewHolderBottom = holder.itemView.getBottom();
+
             Rect iconRect = new Rect(viewHolderWidth - swipeVisibleMark, viewHolderTop, viewHolderWidth, viewHolderBottom);
-            if (iconRect.contains((int) event.getX(), (int) event.getY())){
+
+            if (iconRect.contains((int) event.getX(), (int) event.getY())) {
                 clickedHolder = holder;
                 matchedItemId = itemId;
             } else {
@@ -260,7 +264,9 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             }
         }
 
-        if (clickedHolder == null) { return; }
+        if (clickedHolder == null) {
+            return;
+        }
 
         items.remove(matchedItemId);
 
@@ -301,8 +307,10 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     }
 
     private void closeAllHoldersExcept(RecyclerView recyclerView, long currentItemId) {
-        for (long itemId: items) {
-            if (itemId == currentItemId) { continue; }
+        for (long itemId : new ArrayList<>(items)) {
+            if (itemId == currentItemId) {
+                continue;
+            }
             RecyclerView.ViewHolder prevHolder = recyclerView.findViewHolderForItemId(itemId);
             if (prevHolder != null) closeHolder(prevHolder, itemId);
         }
@@ -363,7 +371,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
         float dx = -swipeVisibleMark;
 
-        for (long itemId: items) {
+        for (long itemId : new ArrayList<>(items)) {
             holder = parent.findViewHolderForItemId(itemId);
             if (holder != null && holder.itemView.getTranslationX() == dx) {
                 drawDecoration(c, parent, holder, dx, holder.getItemId());
@@ -493,7 +501,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
         switch (action) {
             case MotionEvent.ACTION_MOVE:
-                if (velocityTracker == null){
+                if (velocityTracker == null) {
                     obtainVelocityTracker();
                 }
                 velocityTracker.addMovement(event);
