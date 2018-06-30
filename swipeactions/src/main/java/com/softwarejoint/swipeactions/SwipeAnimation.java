@@ -5,7 +5,7 @@ import android.animation.ValueAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
-abstract class SwipeAnimation implements Animator.AnimatorListener {
+abstract class SwipeAnimation<T> implements Animator.AnimatorListener {
 
     private static final String TAG = "SimpleAnimation";
 
