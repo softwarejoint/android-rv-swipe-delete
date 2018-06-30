@@ -167,7 +167,9 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     }
 
     @Override
-    public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+    public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                            float dX, float dY, int actionState, boolean isCurrentlyActive) {
+
         computeValues(viewHolder.itemView);
 
         if (isCurrentlyActive) {
@@ -342,9 +344,11 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             @Override
             public void onAnimationEnd(Animator animation) {
                 getDefaultUIUtil().clearView(holder.itemView);
+                holder.itemView.setAlpha(MAX_ALPHA);
                 super.onAnimationEnd(animation);
             }
         };
+
         swipeInAnimation.setDuration(animationDuration);
         swipeInAnimation.start();
     }
@@ -462,8 +466,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             case MotionEvent.ACTION_DOWN:
                 obtainVelocityTracker();
                 velocityTracker.addMovement(event);
-                initY = (int) (event.getX() + 0.5f);
-                Log.d(TAG, "ondown: " + " iniy: " + initY);
+                initY = (int) (event.getY() + 0.5f);
                 break;
             case MotionEvent.ACTION_UP:
                 if (!isSwiping) {
@@ -500,8 +503,9 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
                 velocityTracker.computeCurrentVelocity(PIXELS_PER_SECOND, mMaxSwipeVelocity);
                 currentVelocity = velocityTracker.getXVelocity(pointerId);
 
-                final int y = (int) (event.getY(index) + 0.5f);
-                if (!isSwiping && Math.abs(initY - y) > mTouchYSlop) {
+                final int currY = (int) (event.getY() + 0.5f);
+
+                if (!isSwiping && Math.abs(initY - currY) > mTouchYSlop) {
                     closeAllHoldersExcept(recyclerView, Long.MIN_VALUE);
                 }
                 break;
