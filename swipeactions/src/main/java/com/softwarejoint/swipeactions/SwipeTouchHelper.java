@@ -184,9 +184,6 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
                              float dX, float dY, long itemId, boolean isCurrentlyActive) {
         float absDx = Math.abs(dX);
 
-        Log.d(TAG, "onChildDraw: " + dX + " abs: " + absDx + " mark: " + swipeVisibleMark + " ac: " + isCurrentlyActive);
-
-        //NOTE: adding extra deleteIconMargin as we begin swiping on that margin
         if (!isCurrentlyActive && swipeVisibleMark > absDx && isItemIdValid(viewHolder.getItemId())) {
             absDx = swipeVisibleMark;
         }
