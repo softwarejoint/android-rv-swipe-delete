@@ -18,11 +18,13 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@SuppressWarnings("WeakerAccess")
 public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback implements
         RecyclerView.OnChildAttachStateChangeListener, RecyclerView.OnItemTouchListener, View.OnTouchListener {
 
@@ -33,12 +35,14 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     private static final int PIXELS_PER_SECOND = 1000;
     private final Drawable deleteIcon;
 
+    private final int mTouchSlop;
     private final int intrinsicWidth;
     private final int intrinsicHeight;
-    private final ColorDrawable background;
     private final float mSwipeEscapeVelocity;
     private final float mMaxSwipeVelocity;
     private final int animationDuration;
+
+    private final ColorDrawable background;
 
     private float currentVelocity = 0;
     private VelocityTracker velocityTracker = null;
@@ -75,6 +79,9 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         mSwipeEscapeVelocity = resources.getDimension(R.dimen.swipe_escape_velocity);
         mMaxSwipeVelocity = resources.getDimension(R.dimen.swipe_max_velocity);
         animationDuration = resources.getInteger(android.R.integer.config_shortAnimTime);
+
+        ViewConfiguration vc = ViewConfiguration.get(recyclerView.getContext());
+        mTouchSlop = vc.getScaledTouchSlop();
 
         if (itemTouchHelper == null) {
             itemTouchHelper = new ItemTouchHelper(this);
@@ -121,9 +128,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
     @Override
     public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        if (!isAttached) {
-            return;
-        }
+        if (!isAttached) return;
 
         long itemId = viewHolder.getItemId();
         if (isItemIdValid(itemId)) { return; }
@@ -179,12 +184,15 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
                              float dX, float dY, long itemId, boolean isCurrentlyActive) {
         float absDx = Math.abs(dX);
 
-        if (swipeVisibleMark > absDx && isItemIdValid(viewHolder.getItemId())) {
+        Log.d(TAG, "onChildDraw: " + dX + " abs: " + absDx + " mark: " + swipeVisibleMark + " ac: " + isCurrentlyActive);
+
+        //NOTE: adding extra deleteIconMargin as we begin swiping on that margin
+        if (!isCurrentlyActive && swipeVisibleMark > absDx && isItemIdValid(viewHolder.getItemId())) {
             absDx = swipeVisibleMark;
         }
 
         float paintTillX = onChildDraw(c, viewHolder, absDx, itemId, isCurrentlyActive);
-        super.onChildDraw(c, recyclerView, viewHolder, paintTillX, dY, ItemTouchHelper.ACTION_STATE_SWIPE, isCurrentlyActive);
+        super.onChildDraw(c, recyclerView, viewHolder, paintTillX, dY, ItemTouchHelper.ACTION_STATE_SWIPE, false);
     }
 
     private float onChildDraw(Canvas c, RecyclerView.ViewHolder viewHolder, float absDx, long itemId, boolean isCurrentlyActive) {
@@ -385,9 +393,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
     public void onChildViewDetachedFromWindow(View view) {
         final RecyclerView.ViewHolder holder = recyclerView.getChildViewHolder(view);
-        if (holder == null) {
-            return;
-        }
+        if (holder == null) return;
 
         if (swipeOutAnimation != null && swipeOutAnimation.getHolder() == holder) {
             if (!swipeOutAnimation.isEnded()) {
