@@ -1,18 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="5dp"
+    tools:showIn="@layout/activity_main">
+
+    <ImageView
+        android:id="@+id/iv_chat_row_user_image"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:scaleType="centerCrop"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/sun_image" />
 
     <TextView
-        android:id="@+id/rowName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        tools:text="Awesome item"/>
+        android:id="@+id/tv_chat_row_username"
+        android:layout_width="wrap_content"
+        android:layout_height="26dp"
+        android:layout_marginStart="60dp"
+        android:layout_alignParentStart="true"
+        android:gravity="start|bottom"
+        android:layout_toStartOf="@+id/tv_chat_row_time"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        tools:text="@tools:sample/full_names"/>
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/tv_chat_row_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/tv_chat_row_username"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="8dp"
+        android:textColor="@android:color/background_dark"
+        android:textSize="12sp"
+        tools:text="@tools:sample/date/ddmmyy"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/tv_chat_row_last_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/tv_chat_row_username"
+        android:layout_below="@+id/tv_chat_row_username"
+        android:layout_toStartOf="@+id/tv_chat_row_time"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:textColor="@color/colorPrimary"
+        android:textSize="12sp"
+        tools:text="This is recent message"/>
+
+    <TextView
+        android:id="@+id/tv_chat_row_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/tv_chat_row_time"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:textSize="12sp"
+        android:layout_alignBaseline="@+id/tv_chat_row_last_message"
+        tools:ignore="HardcodedText"
+        tools:text="(3)"/>
+</RelativeLayout>

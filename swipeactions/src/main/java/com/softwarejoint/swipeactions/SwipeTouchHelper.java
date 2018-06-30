@@ -20,6 +20,7 @@ import android.view.ViewConfiguration;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @SuppressWarnings("WeakerAccess")
 public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback implements
@@ -193,8 +194,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         }
 
         float paintTillX = onChildDraw(c, viewHolder, absDx, itemId, isCurrentlyActive);
-        Log.d(TAG, "paintTillX: " + paintTillX + " absDx: " + absDx + " dbExtra: " + initalSwipe + " ac: " + isCurrentlyActive)
-        ;
+        Log.d(TAG, "paintTillX: " + paintTillX + " absDx: " + absDx + " dbExtra: " + initalSwipe + " ac: " + isCurrentlyActive);
         super.onChildDraw(c, recyclerView, viewHolder, paintTillX, dY, ItemTouchHelper.ACTION_STATE_SWIPE, false);
     }
 
@@ -382,7 +382,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         for (long itemId : new ArrayList<>(items)) {
             holder = parent.findViewHolderForItemId(itemId);
             if (holder != null && holder.itemView.getTranslationX() == dx) {
-                drawDecoration(c, parent, holder, dx, holder.getItemId());
+                drawDecoration(c, parent, holder, dx, itemId);
             }
         }
     }
