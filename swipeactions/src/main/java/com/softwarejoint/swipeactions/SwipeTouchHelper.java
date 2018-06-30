@@ -52,6 +52,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     private float initY;
     private float mTouchYSlop;
     private boolean isTouchInvalidated;
+    private long swipedItemId = RecyclerView.NO_ID;
 
     private SwipeOutAnimation swipeOutAnimation;
     private SwipeInAnimation swipeInAnimation;
@@ -183,12 +184,12 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
                 initialSwipeDX = viewHolder.itemView.getTranslationX();
                 closeAllHoldersExcept(recyclerView, itemId);
                 isTouchInvalidated = false;
+                swipedItemId = itemId;
             }
 
             isSwiping = true;
         } else {
             initialSwipeDX = 0;
-
             if (dX > 0 && currentVelocity == mMaxSwipeVelocity) {
                 //mMaxSwipeVelocity is less than escape velocity so this means user flinged in some directions
                 //we do not delete on fling, so just remove the item from being tracked
@@ -214,7 +215,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             drawDecoration(c, viewHolder, absDx);
         }
 
-        Log.d(TAG, "onTouch: " + itemId + " hashCode: " + viewHolder.hashCode() + " transX: " + viewHolder.itemView.getTranslationX() + " ac: " + isCurrentlyActive);
+        //Log.d(TAG, "onTouch: " + itemId + " transX: " + viewHolder.itemView.getTranslationX() + " ac: " + isCurrentlyActive);
 
         super.onChildDraw(c, recyclerView, viewHolder, -absDx, dY, ItemTouchHelper.ACTION_STATE_SWIPE, false);
     }
@@ -244,27 +245,34 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             float tDx = Math.abs(holder.itemView.getTranslationX());
             drawDecoration(c, holder, tDx);
             drawnItems.add(itemId);
+
+            if (tDx == 0) {
+                items.remove(itemId);
+                swipeAnimItems.remove(itemId);
+                if (swipedItemId == itemId) isTouchInvalidated = true;
+            }
         }
 
         for (long itemId: new ArrayList<>(items)) {
             holder = parent.findViewHolderForItemId(itemId);
             if (holder == null) continue;
 
-            float tDx = Math.abs(holder.itemView.getTranslationX());
-            float absDx = Math.max(tDx, swipeVisibleMark);
+            float absDx = Math.abs(holder.itemView.getTranslationX());
+
+            if (!drawnItems.contains(itemId)) {
+                drawDecoration(c, holder, absDx);
+            }
 
             if (absDx == 0) {
                 items.remove(itemId);
                 swipeAnimItems.remove(itemId);
-                if (isSwiping) isTouchInvalidated = true;
-            } else if (!drawnItems.contains(itemId)) {
-                drawDecoration(c, holder, absDx);
+                if (swipedItemId == itemId) isTouchInvalidated = true;
             }
         }
     }
 
     private void drawDecoration(Canvas c, RecyclerView.ViewHolder viewHolder, float absDx) {
-        Log.d(TAG, "drawDecoration: itemId: " + viewHolder.getItemId() + " xTranslation: " + absDx);
+        //Log.d(TAG, "drawDecoration: itemId: " + viewHolder.getItemId() + " xTranslation: " + absDx);
         final int count = c.save();
 
         View itemView = viewHolder.itemView;
