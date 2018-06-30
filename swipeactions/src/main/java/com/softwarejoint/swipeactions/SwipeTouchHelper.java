@@ -11,6 +11,7 @@ import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -164,15 +165,21 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     @Override
     public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         if (isCurrentlyActive) {
+            if (!isSwiping) {
+                dX = dX + viewHolder.itemView.getTranslationX();
+            }
+
             isSwiping = true;
         }
 
         computeValues(viewHolder.itemView);
 
-        long itemId = viewHolder.getItemId();
+        final long itemId = viewHolder.getItemId();
 
         if (isCurrentlyActive) {
             closeAllHoldersExcept(recyclerView, itemId);
+        } else if (currentVelocity == mMaxSwipeVelocity) {
+            items.remove(itemId);
         }
 
         onChildDraw(c, recyclerView, viewHolder, dX, dY, itemId, isCurrentlyActive);
@@ -187,6 +194,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         }
 
         float paintTillX = onChildDraw(c, viewHolder, absDx, itemId, isCurrentlyActive);
+        Log.d(TAG, "paintTillX: " + paintTillX + " absDx: " + absDx);
         super.onChildDraw(c, recyclerView, viewHolder, paintTillX, dY, ItemTouchHelper.ACTION_STATE_SWIPE, false);
     }
 

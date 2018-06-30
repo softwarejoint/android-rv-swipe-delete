@@ -15,6 +15,13 @@ Based On https://github.com/kitek/android-rv-swipe-delete
 
 Lots of work has been put in making it seem smooth and close to iOS in feel.
 
+### Notes
+
+* Supports custom background color & icon 
+* Supports swipe to delete & click to delete
+* Only 1 row active at a time
+* It is written using canvas, no extra views drawn. Uses pure Java code
+
 ### Using in your project
 
 1. Include jitpack.io maven repo
@@ -33,4 +40,34 @@ Lots of work has been put in making it seem smooth and close to iOS in feel.
 	    compile 'com.github.softwarejoint:/android-rv-swipe-delete:1.1.0'
 	}
 
+```
+
+3. Bind to RecyclerView
+
+```
+        Drawable deleteIcon = ContextCompat.getDrawable(this, R.drawable.ic_delete_white_24);
+        SwipeTouchHelper swipeTouchHelper = new SwipeTouchHelper(recyclerView, deleteIcon, this);
+```
+
+4. Add CallBackListener
+
+```
+    @Override
+    public void onSwipeActionClicked(final RecyclerView.ViewHolder viewHolder) {
+        Log.d(TAG, "onSwipeActionClicked: " + viewHolder.getItemId());
+    }
+
+```
+
+5. Set Custom Color
+
+
+```
+    swipeTouchHelper.setSwipeBackGroundColor(@ColorInt int resourceId) 
+```
+
+6. Undo Action
+
+```
+    swipeTouchHelper.undoAction(viewHolder);
 ```
