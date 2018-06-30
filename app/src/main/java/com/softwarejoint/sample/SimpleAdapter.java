@@ -1,7 +1,13 @@
 package com.softwarejoint.sample;
 
+import android.graphics.Color;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +21,23 @@ import java.util.UUID;
 
 public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder> {
 
+    private static final String TAG = "SimpleAdapter";
+
     private static final int nextBound = 10 * 365 * 24 * 3600;
 
+    private CoordinatorLayout mLayout;
     private ArrayList<RowItem> items;
     private int itemId = 0;
+    private @ColorInt int colorInt = -1;
 
-    SimpleAdapter() {
+    SimpleAdapter(RecyclerView recyclerView) {
         items = new ArrayList<>();
         setHasStableIds(true);
+        mLayout = (CoordinatorLayout) recyclerView.getParent();
+    }
+
+    public void setSnackBarColor(@ColorInt int color) {
+        colorInt = color;
     }
 
     @Override
@@ -62,9 +77,38 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
         notifyItemRangeInserted(startPosition, itemCount);
     }
 
-    void removeAt(int position) {
-        items.remove(position);
+    public RowItem removeAt(final int position) {
+        final RowItem rowItem = items.remove(position);
         notifyItemRemoved(position);
+        Snackbar snackbar = Snackbar.make(mLayout, "rowItem: " + rowItem.text + " : " + position + " removed.", Snackbar.LENGTH_LONG);
+        if (colorInt != -1) {
+            snackbar.setActionTextColor(colorInt);
+        }
+
+        snackbar.setAction("Undo", view -> {
+            undoLastDelete(rowItem, position);
+        });
+
+        snackbar.addCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar transientBottomBar, int event) {
+                super.onDismissed(transientBottomBar, event);
+                onItemDeleteConfirmed(rowItem, position);
+            }
+        });
+
+        snackbar.show();
+
+        return rowItem;
+    }
+
+    protected void onItemDeleteConfirmed(RowItem rowItem, int position) {
+        Log.d(TAG, "onItemDeleteConfirmed: " + position);
+    }
+
+    private void undoLastDelete(RowItem item, int position) {
+        items.add(position, item);
+        notifyItemInserted(position);
     }
 
     @Override

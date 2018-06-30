@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         addItemBtn.setOnClickListener(this);
 
-        adapter = new SimpleAdapter();
+        adapter = new SimpleAdapter(recyclerView);
         adapter.addItems(seedItemCount);
 
         recyclerView.setHasFixedSize(true);
@@ -73,12 +73,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    int randomVar = 0;
+
     @Override
     public void onSwipeActionClicked(final RecyclerView.ViewHolder viewHolder) {
-        Log.d(TAG, "onSwipeActionClicked: " + viewHolder.getItemId() + " views: " + viewHolder.hashCode());
-        uiThreadHandler.postDelayed(() -> {
-            Log.d(TAG, "onSwipeActionClicked: " + viewHolder.getItemId() + " hash : " + viewHolder.hashCode());
-            swipeTouchHelper.undoAction(viewHolder);
-        }, 2000);
+        randomVar = randomVar + 1;
+
+        if (randomVar % 2 == 0) {
+            uiThreadHandler.postDelayed(() -> swipeTouchHelper.undoAction(viewHolder), 200L);
+        } else {
+            final int position = viewHolder.getAdapterPosition();
+            uiThreadHandler.postDelayed(() -> adapter.removeAt(position), 200L);
+        }
     }
 }
