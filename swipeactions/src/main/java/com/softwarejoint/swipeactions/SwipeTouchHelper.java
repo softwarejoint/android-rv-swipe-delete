@@ -32,7 +32,6 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     private static final int PIXELS_PER_SECOND = 1000;
     private final Drawable deleteIcon;
 
-    private final int mTouchSlop;
     private final int intrinsicWidth;
     private final int intrinsicHeight;
     private final float mSwipeEscapeVelocity;
@@ -46,6 +45,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
     private int viewHolderWidth;
     private int deleteIconLeft, deleteIconRight, deleteIconMargin, swipeVisibleMark;
+    private float initalSwipe;
     private boolean valuesComputed;
     private boolean isSwiping;
 
@@ -76,9 +76,6 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         mSwipeEscapeVelocity = resources.getDimension(R.dimen.swipe_escape_velocity);
         mMaxSwipeVelocity = resources.getDimension(R.dimen.swipe_max_velocity);
         animationDuration = resources.getInteger(android.R.integer.config_shortAnimTime);
-
-        ViewConfiguration vc = ViewConfiguration.get(recyclerView.getContext());
-        mTouchSlop = vc.getScaledTouchSlop();
 
         if (itemTouchHelper == null) {
             itemTouchHelper = new ItemTouchHelper(this);
@@ -164,15 +161,17 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
     @Override
     public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+        computeValues(viewHolder.itemView);
+
         if (isCurrentlyActive) {
             if (!isSwiping) {
-                dX = dX + viewHolder.itemView.getTranslationX();
+                initalSwipe = viewHolder.itemView.getTranslationX();
             }
 
             isSwiping = true;
+        } else {
+            initalSwipe = 0;
         }
-
-        computeValues(viewHolder.itemView);
 
         final long itemId = viewHolder.getItemId();
 
@@ -182,7 +181,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             items.remove(itemId);
         }
 
-        onChildDraw(c, recyclerView, viewHolder, dX, dY, itemId, isCurrentlyActive);
+        onChildDraw(c, recyclerView, viewHolder, dX + initalSwipe, dY, itemId, isCurrentlyActive);
     }
 
     private void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
@@ -194,7 +193,8 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         }
 
         float paintTillX = onChildDraw(c, viewHolder, absDx, itemId, isCurrentlyActive);
-        Log.d(TAG, "paintTillX: " + paintTillX + " absDx: " + absDx);
+        Log.d(TAG, "paintTillX: " + paintTillX + " absDx: " + absDx + " dbExtra: " + initalSwipe + " ac: " + isCurrentlyActive)
+        ;
         super.onChildDraw(c, recyclerView, viewHolder, paintTillX, dY, ItemTouchHelper.ACTION_STATE_SWIPE, false);
     }
 
