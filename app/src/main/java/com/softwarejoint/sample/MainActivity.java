@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-        uiThreadHandler.postDelayed(this::loopUpdates, 5000L);
+       // uiThreadHandler.postDelayed(this::loopUpdates, 5000L);
     }
 
     //Refresh adapter contents after 5 seconds
@@ -78,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onSwipeActionClicked(final RecyclerView.ViewHolder viewHolder) {
+        final long itemId = viewHolder.getItemId();
+
         randomVar = randomVar + 1;
 
         if (randomVar % 2 == 0) {
@@ -86,7 +88,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             //Undo delete row swipe action
             final int position = viewHolder.getAdapterPosition();
-            uiThreadHandler.postDelayed(() -> adapter.removeAt(position), 200L);
+            uiThreadHandler.postDelayed(() -> {
+                adapter.removeAt(position);
+                swipeTouchHelper.markActionComplete(itemId);
+            }, 200L);
         }
     }
 }
