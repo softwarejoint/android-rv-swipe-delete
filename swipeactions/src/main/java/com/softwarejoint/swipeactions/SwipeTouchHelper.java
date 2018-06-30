@@ -45,7 +45,6 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
     private int viewHolderWidth;
     private int deleteIconLeft, deleteIconRight, deleteIconMargin, swipeVisibleMark;
-    private int actionEnabledTouchSlop;
     private float initialSwipeDX;
     private boolean valuesComputed;
     private boolean isSwiping;
@@ -62,6 +61,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     private ItemTouchHelper itemTouchHelper;
 
     private boolean isAttached;
+    private boolean touchInputsViable;
     private SimpleItemDecoration itemDecoration;
     private Set<Long> items = new LinkedHashSet<>();
     private Set<Long> swipeAnimItems = new LinkedHashSet<>();
@@ -162,8 +162,6 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
         valuesComputed = true;
 
-        actionEnabledTouchSlop = swipeVisibleMark + deleteIconMargin;
-
         mTouchYSlop = viewHolderHeight;
     }
 
@@ -174,6 +172,8 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     @Override
     public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
                             float dX, float dY, int actionState, boolean isCurrentlyActive) {
+
+        touchInputsViable = isCurrentlyActive;
 
         computeValues(viewHolder.itemView);
 
@@ -202,20 +202,20 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         float absDx = Math.abs(dX) + initialSwipeDX;
 
         if (isCurrentlyActive) {
-            if (absDx - actionEnabledTouchSlop >= 0 && currentVelocity < mMaxSwipeVelocity) {
+            if (absDx - swipeVisibleMark >= 0 && currentVelocity < mMaxSwipeVelocity) {
                 if (items.add(itemId)) drawDecoration(c, viewHolder, absDx);
             } else {
                 items.remove(itemId);
+            }
+
+            if (!items.contains(itemId)) {
+                drawDecoration(c, viewHolder, absDx);
             }
         } else if (isItemIdValid(itemId)) {
             absDx = Math.max(absDx, swipeVisibleMark);
         }
 
-        if (!items.contains(itemId)) {
-            drawDecoration(c, viewHolder, absDx);
-        }
-
-        //Log.d(TAG, "onTouch: " + itemId + " transX: " + viewHolder.itemView.getTranslationX() + " ac: " + isCurrentlyActive);
+        Log.d(TAG, "onTouch: " + itemId + " transX: " + viewHolder.itemView.getTranslationX() + " ac: " + isCurrentlyActive);
 
         super.onChildDraw(c, recyclerView, viewHolder, -absDx, dY, ItemTouchHelper.ACTION_STATE_SWIPE, false);
     }
@@ -246,10 +246,13 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             drawDecoration(c, holder, tDx);
             drawnItems.add(itemId);
 
+            if (!touchInputsViable && swipedItemId == itemId) {
+                isTouchInvalidated = true;
+            }
+
             if (tDx == 0) {
                 items.remove(itemId);
                 swipeAnimItems.remove(itemId);
-                if (swipedItemId == itemId) isTouchInvalidated = true;
             }
         }
 
@@ -263,16 +266,19 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
                 drawDecoration(c, holder, absDx);
             }
 
+            if (!touchInputsViable && swipedItemId == itemId) {
+                isTouchInvalidated = true;
+            }
+
             if (absDx == 0) {
                 items.remove(itemId);
                 swipeAnimItems.remove(itemId);
-                if (swipedItemId == itemId) isTouchInvalidated = true;
             }
         }
     }
 
     private void drawDecoration(Canvas c, RecyclerView.ViewHolder viewHolder, float absDx) {
-        //Log.d(TAG, "drawDecoration: itemId: " + viewHolder.getItemId() + " xTranslation: " + absDx);
+        Log.d(TAG, "drawDecoration: itemId: " + viewHolder.getItemId() + " xTranslation: " + absDx);
         final int count = c.save();
 
         View itemView = viewHolder.itemView;
