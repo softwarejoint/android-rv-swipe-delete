@@ -1,7 +1,6 @@
 package com.softwarejoint.swipeactions;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -9,6 +8,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewConfigurationCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
@@ -20,9 +20,8 @@ import android.view.ViewConfiguration;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "ClickableViewAccessibility"})
 public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback implements
         RecyclerView.OnChildAttachStateChangeListener, RecyclerView.OnItemTouchListener, View.OnTouchListener {
 
@@ -46,11 +45,12 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
     private int viewHolderWidth;
     private int deleteIconLeft, deleteIconRight, deleteIconMargin, swipeVisibleMark;
-    private float initalSwipe;
+    private float initialSwipeDX;
     private boolean valuesComputed;
     private boolean isSwiping;
     private float initY;
-    private float mTouchYSlop = 100;
+    private float mTouchYSlop;
+    private boolean isTouchInvalidated = false;
 
     private SwipeOutAnimation swipeOutAnimation;
     private SwipeInAnimation swipeInAnimation;
@@ -174,12 +174,18 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
         if (isCurrentlyActive) {
             if (!isSwiping) {
-                initalSwipe = viewHolder.itemView.getTranslationX();
+                initialSwipeDX = viewHolder.itemView.getTranslationX();
+                isTouchInvalidated = false;
             }
 
             isSwiping = true;
         } else {
-            initalSwipe = 0;
+            initialSwipeDX = 0;
+        }
+
+        if (isSwiping && isTouchInvalidated) {
+            initialSwipeDX = 0;
+            return;
         }
 
         final long itemId = viewHolder.getItemId();
@@ -190,7 +196,9 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
             items.remove(itemId);
         }
 
-        onChildDraw(c, recyclerView, viewHolder, dX + initalSwipe, dY, itemId, isCurrentlyActive);
+        Log.d(TAG, "onTouch: " + itemId + " hashCode: " + viewHolder.hashCode() + " transX: " + viewHolder.itemView.getTranslationX() + " ac: " + isCurrentlyActive);
+
+        onChildDraw(c, recyclerView, viewHolder, dX + initialSwipeDX, dY, itemId, isCurrentlyActive);
     }
 
     private void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
@@ -202,7 +210,6 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         }
 
         float paintTillX = onChildDraw(c, viewHolder, absDx, itemId, isCurrentlyActive);
-        Log.d(TAG, "paintTillX: " + paintTillX + " absDx: " + absDx + " dbExtra: " + initalSwipe + " ac: " + isCurrentlyActive);
         super.onChildDraw(c, recyclerView, viewHolder, paintTillX, dY, ItemTouchHelper.ACTION_STATE_SWIPE, false);
     }
 
@@ -390,7 +397,19 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
         for (long itemId : new ArrayList<>(items)) {
             holder = parent.findViewHolderForItemId(itemId);
-            if (holder != null && holder.itemView.getTranslationX() == dx) {
+
+            if (holder == null) {
+                Log.d(TAG, "drawDecoration: itemId: " + itemId + " hash: NULL");
+                continue;
+            }
+
+            final float currTranslationX = holder.itemView.getTranslationX();
+
+            Log.d(TAG, "drawDecoration: itemId: " + itemId + " hash: " + holder.hashCode() + " xTranslation: " + currTranslationX);
+
+            if (currTranslationX == 0) {
+                items.remove(itemId);
+            } else if (currTranslationX == dx) {
                 drawDecoration(c, parent, holder, dx, itemId);
             }
         }
@@ -404,6 +423,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         c.restoreToCount(count);
     }
 
+    @SuppressWarnings("unused")
     public void setOnSwipeItemClickedListener(OnSwipeItemClickedListener onSwipeItemClickedListener) {
         this.onSwipeItemClickedListener = onSwipeItemClickedListener;
     }

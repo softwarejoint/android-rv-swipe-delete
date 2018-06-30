@@ -52,9 +52,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-        //uiThreadHandler.postDelayed(this::loopUpdates, 5000L);
+        uiThreadHandler.postDelayed(this::loopUpdates, 5000L);
     }
 
+    //Refresh adapter contents after 5 seconds
     private void loopUpdates() {
         if (isFinishing() || isDestroyed()) return;
         uiThreadHandler.postDelayed(this::loopUpdates, 5000L);

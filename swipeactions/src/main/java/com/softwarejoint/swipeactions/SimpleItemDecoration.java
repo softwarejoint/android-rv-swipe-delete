@@ -6,8 +6,9 @@ import android.util.Log;
 
 public class SimpleItemDecoration extends RecyclerView.ItemDecoration {
 
-    private SwipeTouchHelper itemTouchHelper;
     private static final String TAG = "SimpleItemDecoration";
+
+    private SwipeTouchHelper itemTouchHelper;
 
     SimpleItemDecoration(SwipeTouchHelper itemTouchHelper) {
         this.itemTouchHelper = itemTouchHelper;
