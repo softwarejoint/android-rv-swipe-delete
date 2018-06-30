@@ -55,8 +55,21 @@ Lots of work has been put in making it seem smooth and close to iOS in feel.
     @Override
     public void onSwipeActionClicked(final RecyclerView.ViewHolder viewHolder) {
         Log.d(TAG, "onSwipeActionClicked: " + viewHolder.getItemId());
-    }
+        
+        final int position = viewHolder.getAdapterPosition();
+        final long itemId = viewHolder.getItemId();
 
+        //Network Op...
+        if (doNetworkOp()) {
+            //actionCompleted
+            adapter.removeAt(position);
+            swipeTouchHelper.markActionComplete(itemId);
+        } else {
+            //actionCancelled
+            swipeTouchHelper.undoAction(viewHolder)
+        }
+    }
+    
 ```
 
 5. Set Custom Color
