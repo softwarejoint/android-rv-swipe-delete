@@ -49,6 +49,8 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     private float initalSwipe;
     private boolean valuesComputed;
     private boolean isSwiping;
+    private float initY;
+    private float mTouchYSlop = 100;
 
     private SwipeOutAnimation swipeOutAnimation;
     private SwipeInAnimation swipeInAnimation;
@@ -77,6 +79,9 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         mSwipeEscapeVelocity = resources.getDimension(R.dimen.swipe_escape_velocity);
         mMaxSwipeVelocity = resources.getDimension(R.dimen.swipe_max_velocity);
         animationDuration = resources.getInteger(android.R.integer.config_shortAnimTime);
+
+        ViewConfiguration configuration = ViewConfiguration.get(recyclerView.getContext());
+        mTouchYSlop = configuration.getScaledTouchSlop() * 4;
 
         if (itemTouchHelper == null) {
             itemTouchHelper = new ItemTouchHelper(this);
@@ -125,10 +130,9 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
         if (!isAttached) return;
 
-        long itemId = viewHolder.getItemId();
-        if (isItemIdValid(itemId)) {
-            return;
-        }
+        final long itemId = viewHolder.getItemId();
+
+        if (isItemIdValid(itemId)) return;
 
         viewHolder.itemView.setAlpha(1.0f);
         super.clearView(recyclerView, viewHolder);
@@ -144,7 +148,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
     private void computeValues(View itemView) {
         if (valuesComputed) return;
 
-        int viewHolderHeight = itemView.getBottom() - itemView.getTop();
+        final int viewHolderHeight = itemView.getBottom() - itemView.getTop();
         viewHolderWidth = itemView.getWidth();
 
         deleteIconMargin = (viewHolderHeight - intrinsicHeight) / 2;
@@ -154,6 +158,8 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         swipeVisibleMark = intrinsicWidth + (deleteIconMargin * 2);
 
         valuesComputed = true;
+
+        mTouchYSlop = viewHolderHeight;
     }
 
     private boolean isItemIdValid(long itemId) {
@@ -268,13 +274,11 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
                 clickedHolder = holder;
                 matchedItemId = itemId;
             } else {
-                closeHolder(holder, itemId);
+                undoAction(holder);
             }
         }
 
-        if (clickedHolder == null) {
-            return;
-        }
+        if (clickedHolder == null) return;
 
         items.remove(matchedItemId);
 
@@ -316,32 +320,33 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
     private void closeAllHoldersExcept(RecyclerView recyclerView, long currentItemId) {
         for (long itemId : new ArrayList<>(items)) {
-            if (itemId == currentItemId) {
-                continue;
-            }
+            if (itemId == currentItemId) continue;
             RecyclerView.ViewHolder prevHolder = recyclerView.findViewHolderForItemId(itemId);
-            if (prevHolder != null) closeHolder(prevHolder, itemId);
+            if (prevHolder != null) undoAction(prevHolder);
         }
     }
 
-    private void closeHolder(final RecyclerView.ViewHolder holder, long itemId) {
-        if (holder.itemView.getTranslationX() < 0) {
-            holder.itemView.animate().alpha(1)
-                    .translationX(0)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            getDefaultUIUtil().clearView(holder.itemView);
-                        }
+    public void undoAction(RecyclerView.ViewHolder holder) {
+        float animateX = Math.abs(holder.itemView.getTranslationX());
 
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
-                            super.onAnimationCancel(animation);
-                        }
-                    }).setDuration(animationDuration).start();
-        }
-        items.remove(itemId);
+        attachToRecyclerView(null);
+        attachToRecyclerView(recyclerView);
+
+        items.remove(holder.getItemId());
+        swipeInAnimation = new SwipeInAnimation(recyclerView, holder, animateX) {
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                super.onAnimationCancel(animator);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                getDefaultUIUtil().clearView(holder.itemView);
+                super.onAnimationEnd(animation);
+            }
+        };
+        swipeInAnimation.setDuration(animationDuration);
+        swipeInAnimation.start();
     }
 
     private void clearSwipeTouchVars() {
@@ -427,29 +432,6 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
         }
     }
 
-    public void undoAction(RecyclerView.ViewHolder holder) {
-        float animateX = Math.abs(holder.itemView.getTranslationX());
-
-        attachToRecyclerView(null);
-        attachToRecyclerView(recyclerView);
-
-        items.remove(holder.getItemId());
-        swipeInAnimation = new SwipeInAnimation(recyclerView, holder, animateX) {
-            @Override
-            public void onAnimationCancel(Animator animator) {
-                super.onAnimationCancel(animator);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                getDefaultUIUtil().clearView(holder.itemView);
-                super.onAnimationEnd(animation);
-            }
-        };
-        swipeInAnimation.setDuration(animationDuration);
-        swipeInAnimation.start();
-    }
-
     private void attachToRecyclerView(RecyclerView recyclerView) {
         isAttached = recyclerView != null;
         itemTouchHelper.attachToRecyclerView(recyclerView);
@@ -474,12 +456,14 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
     @Override
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent event) {
-        int action = event.getActionMasked();
+        final int action = event.getActionMasked();
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 obtainVelocityTracker();
                 velocityTracker.addMovement(event);
+                initY = (int) (event.getX() + 0.5f);
+                Log.d(TAG, "ondown: " + " iniy: " + initY);
                 break;
             case MotionEvent.ACTION_UP:
                 if (!isSwiping) {
@@ -515,6 +499,11 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
                 velocityTracker.addMovement(event);
                 velocityTracker.computeCurrentVelocity(PIXELS_PER_SECOND, mMaxSwipeVelocity);
                 currentVelocity = velocityTracker.getXVelocity(pointerId);
+
+                final int y = (int) (event.getY(index) + 0.5f);
+                if (!isSwiping && Math.abs(initY - y) > mTouchYSlop) {
+                    closeAllHoldersExcept(recyclerView, Long.MIN_VALUE);
+                }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
