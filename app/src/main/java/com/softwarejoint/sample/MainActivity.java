@@ -1,5 +1,6 @@
 package com.softwarejoint.sample;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Drawable deleteIcon = ContextCompat.getDrawable(this, R.drawable.ic_delete_white_24);
         //noinspection ConstantConditions
         swipeTouchHelper = new SwipeTouchHelper(recyclerView, deleteIcon, this);
+        swipeTouchHelper.setSwipeBackGroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
     }
 
     @Override

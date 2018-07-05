@@ -199,7 +199,7 @@ public final class SwipeTouchHelper extends ItemTouchHelper.SimpleCallback imple
 
         if (isTouchInvalidated) return;
 
-        float absDx = Math.abs(dX) + initialSwipeDX;
+        float absDx = Math.abs(dX + initialSwipeDX);
 
         if (isCurrentlyActive) {
             if (absDx - swipeVisibleMark >= 0 && currentVelocity < mMaxSwipeVelocity) {
