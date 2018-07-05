@@ -37,7 +37,7 @@ Lots of work has been put in making it seem smooth and close to iOS in feel.
 
 ```
     dependencies {
-	    compile 'com.github.softwarejoint:/android-rv-swipe-delete:1.1.0'
+	    compile 'com.github.softwarejoint:/android-rv-swipe-delete:1.1.1'
 	}
 
 ```
